@@ -1,0 +1,2 @@
+class StreetError(Exception):
+    pass

@@ -4,7 +4,7 @@ callejero.py
 Matemática Discreta - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GPxxx
+Grupo: GP09B
 Integrantes:
     - Javier Mochales López
     - Javier Martínez Berenguer
