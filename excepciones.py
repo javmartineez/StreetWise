@@ -1,2 +1,2 @@
-class StreetError(Exception):
+class AddressNotFoundError(Exception):
     pass
