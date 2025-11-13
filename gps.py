@@ -13,6 +13,21 @@ Descripción:
 XXXXXXXXXX
 
 """
+"""
+gps.py
+
+Matemática Discreta - IMAT
+ICAI, Universidad Pontificia Comillas
+
+Grupo: GP09B
+Integrantes:
+    - Javier Mochales López
+    - Javier Martínez Berenguer
+
+Descripción:
+XXXXXXXXXX
+
+"""
 import excepciones as e
 import re
 import pandas as pd
@@ -33,7 +48,7 @@ def limpieza_fichero() -> pd.DataFrame:
     return df
 
 
-def gmd_a_grados(data) -> pd.Series:
+def gmd_a_grados(data):
     grados, minutos, segundos, direccion = data.iloc[:,0], data.iloc[:,1], data.iloc[:,2], data.iloc[:,3]
     grados_dec = grados + minutos/60 + segundos/3600
     direccion = direccion.map({"N" : 1, "E" : 1, "S" : -1, "W" : -1})
@@ -105,5 +120,6 @@ def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
 
 if __name__ == "__main__":
     df  = limpieza_fichero()
-    lat, lon = direccion_a_coordenadas("Calle de Alberto Aguilera, 1", df)
-    print(lat, lon)
+    print(df.isna().any())
+    # lat, lon = direccion_a_coordenadas("Calle de Alberto Aguilera, 1", df)
+    # print(lat, lon)
