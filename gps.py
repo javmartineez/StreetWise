@@ -80,10 +80,7 @@ def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
     replacements = {"Á":"A", "É":"E", "Ó":"O", "Ú":"U"}
     direccion_clean = ''.join([replacements.get(caracter, caracter) for caracter in direccion])
 
-    #3) SEPARAR VIA Y NUMERO
-    dir, num = direccion_clean.split(sep=",")
-
-    #4) CASAR PATRON
+    #3) CASAR PATRON
     m = regex_via.match(dir)
     if not m: 
         raise ValueError(f"No se reconoce la estructura de la vía: '{dir}'")
@@ -92,7 +89,7 @@ def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
     par = (m.group(2) or '').strip() or None
     via = m.group(3)
     
-    #5) ENCONTRAR EN EL DF
+    #4) ENCONTRAR EN EL DF
     dir, num_raw = [p.strip() for p in direccion_clean.split(",", 1)]
     mnum = re.search(r"\d+", num_raw)
     if not mnum:
@@ -109,7 +106,7 @@ def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
     
     candidatos = df.loc[mask, ["LATITUD","LONGITUD"]]
 
-    #6) GESTION DE ERRORES
+    #5) GESTION DE ERRORES
     if len(candidatos) == 0: 
         raise e.AddressNotFoundError("Calle no encontrada en la base de datos")
 
