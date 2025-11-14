@@ -20,7 +20,8 @@ import networkx as nx
 import pandas as pd
 import re
 import difflib
-import os 
+import os
+import matplotlib.pyplot as plt
 
 from typing import Tuple
 
@@ -213,7 +214,7 @@ def carga_grafo() -> nx.MultiDiGraph:
         ox.save_graphml(G, filepath="madrid.graphml")
     
     G = ox.load_graphml(filepath="madrid.graphml")
-    ox.plot_graph(G=G, node_size=0,edge_linewidth=0.5)
+    return G
     
 
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
@@ -231,4 +232,12 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     G.remove_edges_from(loops)
 
     return G
+
+if __name__ == "__main__":
+    G = carga_grafo()
+    Gd = procesa_grafo(G)
+    pos = {n: (Gd.nodes[n]["x"], Gd.nodes[n]["y"]) for n in Gd.nodes()}
+    nx.draw(Gd, pos=pos, node_size=0, width=0.5)
+    plt.show()
+
 
