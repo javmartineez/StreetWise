@@ -20,6 +20,7 @@ import networkx as nx
 import pandas as pd
 import re
 import difflib
+import os 
 
 from typing import Tuple
 
@@ -204,8 +205,16 @@ def carga_grafo() -> nx.MultiDiGraph:
     Raises:
         ServiceNotAvailableError: Si no es posible recuperar el grafo de OpenStreetMap.
     """
-    pass
+    ruta_grafo = "madrid.graphml"
+    existencia = os.path.exists(ruta_grafo)
 
+    if not existencia:  #Cargamos el grafo de open street map si no se ha descargado previamente
+        G = ox.graph_from_place("Madrid, Spain", network_type="drive")
+        ox.save_graphml(G, filepath="madrid.graphml")
+    
+    G = ox.load_graphml(filepath="madrid.graphml")
+    ox.plot_graph(G=G, node_size=0,edge_linewidth=0.5)
+    
 
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
