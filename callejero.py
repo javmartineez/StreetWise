@@ -84,17 +84,28 @@ def carga_callejero() -> pd.DataFrame:
     callejero["LATITUD"] = gmd_a_grados(aux[cols_la])
     callejero["LONGITUD"] = gmd_a_grados(aux[cols_lo])
 
-    for col in ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]:
-        callejero[col + "_N"] = callejero[col].fillna("").map(normaliza_texto)
+    cols = ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]
+    callejero[cols] = callejero[cols].apply(lambda col: col.map(normaliza_texto))
 
     return callejero
 
 
-def gmd_a_grados(data) -> pd.Series:
-    grados, minutos, segundos, direccion = data.iloc[:,0], data.iloc[:,1], data.iloc[:,2], data.iloc[:,3]
-    grados_dec = grados + minutos/60 + segundos/3600
+def gmd_a_grados(data: pd.DataFrame) -> pd.Series:
+    """
+    Transforma los datos del DataFrame a grados decimales y añade signo dependiendo
+    de la orinetación de la localización.
+    Args:
+        -data: DataFrame con la información de la localización.
+    Returns:
+        -Un Series con la posición transformada a grados decimales.
+    """
+    lista_divisores = pd.array([1,60,3600])
+    valores = data.iloc[:,:-1]
+    valores = valores / lista_divisores
+    direccion = data.iloc[:,-1]
     direccion = direccion.map({"N" : 1, "E" : 1, "S" : -1, "W" : -1})
-    return grados_dec * direccion
+    return valores.sum(axis=1)*direccion
+
 
 
 def normaliza_texto(cadena: str) -> str:
