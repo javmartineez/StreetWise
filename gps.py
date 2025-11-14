@@ -45,6 +45,10 @@ def limpieza_fichero() -> pd.DataFrame:
     aux[cols_la[:-1] + cols_lo[:-1]] = aux[cols_la[:-1] + cols_lo[:-1]].astype("float")
     df["LATITUD"] = gmd_a_grados(aux[cols_la])
     df["LONGITUD"] = gmd_a_grados(aux[cols_lo])
+
+    for col in ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]:
+        df[col + "_N"] = df[col].fillna("").map(normaliza_texto)
+        
     return df
 
 
@@ -54,19 +58,26 @@ def gmd_a_grados(data):
     direccion = direccion.map({"N" : 1, "E" : 1, "S" : -1, "W" : -1})
     return grados_dec * direccion
 
-# def direccion_calle(calle: str, df: pd.DataFrame):
-#     regex = r"([A-Za-z]+)\s"
-#     nombre, numero = calle.split(sep = ",")
-#     nombre, numero  = nombre.strip(), numero.strip()
-#     resultado = df.loc[df["VIA_NOMBRE"] == calle, ["LATITUD","LONGITUD"]]
 
-#     if resultado.empty:
-#         raise e.AdressNotFoundError("La calle solicitada no se encuentra en la base de datos")
-    
-#     latitud, longitud = resultado.loc[0,"LATITUD"], resultado.loc[0,"LONGITUD"]
-#     return latitud, longitud
+def normaliza_texto(cadena: str) -> str:
+    """
+    Función encargada de normalizar la entrada (dirección) del usuario
+    Args: 
+        - cadena(str): dirección a normalizar
+    Returns: 
+        - cadena limpia sin tildes ni otros elementos
+    """
+    if cadena is None:
+        return ""
+    cadena = str(cadena).upper()
+    reemplazos = {
+        "Á": "A", "É": "E", "Í": "I", "Ó": "O", "Ú": "U", "Ü": "U",
+        "À": "A", "È": "E", "Ì": "I", "Ò": "O", "Ù": "U",
+        "Ñ": "N",
+    }
+    return "".join(reemplazos.get(c, c) for c in cadena)
 
-    
+
 def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
     #1) DEFINIR EL FORMATO QUE VAMOS A ACEPTAR 
     CLASES = r"AUTOVIA|AVENIDA|CALLE|CAMINO|CARRETERA|GLORIETA|PASAJE|PASEO|PLAZA|RONDA|TRAVESIA"
@@ -74,11 +85,7 @@ def direccion_a_coordenadas(direccion:str, df:pd.DataFrame) -> tuple:
     regex_via = re.compile(rf"^\s*({CLASES})\s+({PARES})?\s+(.+)\s*$")
 
     #2) NORMALIZAR LA ENTRADA DEL USUARIO
-    #pasar todo a mayusculas
-    direccion = direccion.upper()
-    #quitar tildes
-    replacements = {"Á":"A", "É":"E", "Ó":"O", "Ú":"U"}
-    direccion_clean = ''.join([replacements.get(caracter, caracter) for caracter in direccion])
+    direccion_clean = normaliza_texto(direccion)
 
     #3) SEPARAR VIA Y NUMERO
     dir, num_raw = [p.strip() for p in direccion_clean.split(",", 1)]
