@@ -213,7 +213,8 @@ def carga_grafo() -> nx.MultiDiGraph:
         ox.save_graphml(G, filepath="madrid.graphml")
     
     G = ox.load_graphml(filepath="madrid.graphml")
-    ox.plot_graph(G=G, node_size=0,edge_linewidth=0.5)
+    
+    return G
     
 
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
