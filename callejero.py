@@ -109,7 +109,15 @@ def gmd_a_grados(data: pd.DataFrame) -> pd.Series:
 
 
 def normaliza_texto(cadena: str) -> str:
-    """Mayúsculas, sin tildes ni eñes raras."""
+    """
+    Función encargada de normalizar el texto a mayúsculas y sin tildes
+    y/o elementos sintácticos adicionales. 
+
+    Args: 
+        - cadena(str): cadena a normalizar 
+    Returns: 
+        - cadena limpia normalizada
+    """
     if cadena is None:
         return ""
     s = str(cadena).upper()
@@ -139,6 +147,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
         busca_direccion("Calle de Alberto Aguilera, 23", data)=(40.42998055555555,3.7112583333333333)
         busca_direccion("Calle de Alberto Aguilera, 25", data)=(40.43013055555555,3.7126916666666667)
     """
+    
     #1) DEFINIR EL FORMATO QUE VAMOS A ACEPTAR 
     CLASES = r"AUTOVIA|AUTOPISTA|AVENIDA|CALLE|CAMINO|CARRETERA|GLORIETA|PASAJE|PASEO|PLAZA|RONDA|TRAVESIA"
     PARES = r"DE LAS|DE LOS|DE LA|DEL|DE"
@@ -225,6 +234,7 @@ def carga_grafo() -> nx.MultiDiGraph:
         ox.save_graphml(G, filepath="madrid.graphml")
     
     G = ox.load_graphml(filepath="madrid.graphml")
+    
     return G
     
 
