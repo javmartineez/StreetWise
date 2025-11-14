@@ -15,18 +15,11 @@ __pycache__/
 # Ignorar dataset 
 direcciones.csv
 
-
 # Ignorar notebook pruebas
 prueba.ipynb
 
 # Ignorar grafo de madrid
 madrid.graphml
-
-# Ignorar notebook pruebas
-prueba.ipynb
-
-#Ignorar apuntes 
-apuntes_practica_presencial.ipynb
 
 #Ignorar apuntes 
 apuntes_practica_presencial.ipynb
