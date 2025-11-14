@@ -98,7 +98,15 @@ def gmd_a_grados(data) -> pd.Series:
 
 
 def normaliza_texto(cadena: str) -> str:
-    """Mayúsculas, sin tildes ni eñes raras."""
+    """
+    Función encargada de normalizar el texto a mayúsculas y sin tildes
+    y/o elementos sintácticos adicionales. 
+
+    Args: 
+        - cadena(str): cadena a normalizar 
+    Returns: 
+        - cadena limpia normalizada
+    """
     if cadena is None:
         return ""
     s = str(cadena).upper()
