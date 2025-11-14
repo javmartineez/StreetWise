@@ -23,3 +23,6 @@ madrid.graphml
 
 #Ignorar apuntes 
 apuntes_practica_presencial.ipynb
+
+#ignorar la cache del hml
+cache/
