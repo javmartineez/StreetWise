@@ -84,8 +84,10 @@ def carga_callejero() -> pd.DataFrame:
     callejero["LATITUD"] = gmd_a_grados(aux[cols_la])
     callejero["LONGITUD"] = gmd_a_grados(aux[cols_lo])
 
-    cols = ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]
-    callejero[cols] = callejero[cols].apply(lambda col: col.map(normaliza_texto))
+    #cols = ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]
+    #callejero[cols] = callejero[cols].fillna("").apply(lambda col: col.map(normaliza_texto))
+    for col in ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]:
+        callejero[col] = callejero[col].fillna("").map(normaliza_texto)
 
     return callejero
 
@@ -175,7 +177,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     #5) ENCONTRAR EN EL DF
     mask_exacta = (
         (callejero["VIA_CLASE"]  == clase) &
-        (callejero["VIA_PAR"].fillna("") == par) &
+        (callejero["VIA_PAR"] == par) &
         (callejero["VIA_NOMBRE"] == via) &
         (callejero["NUMERO"].astype("Int64") == numero)
         )
@@ -255,7 +257,10 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
 
 if __name__ == "__main__":
     callejero = carga_callejero()
-    lat, lon = busca_direccion("Calle Gran Via, 1", callejero)
+    direccion = "Calle Gran Via, 1"
+    lat, lon = busca_direccion(direccion, callejero)
     print(lat, lon)
+
+
 
 
