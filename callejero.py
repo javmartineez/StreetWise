@@ -140,7 +140,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     #1) DEFINIR EL FORMATO QUE VAMOS A ACEPTAR 
     CLASES = r"AUTOVIA|AUTOPISTA|AVENIDA|CALLE|CAMINO|CARRETERA|GLORIETA|PASAJE|PASEO|PLAZA|RONDA|TRAVESIA"
     PARES = r"DE LAS|DE LOS|DE LA|DEL|DE"
-    regex_via = re.compile(rf"^\s*({CLASES})\s+({PARES})?\s+(.+)\s*$")
+    regex_via = re.compile(rf"^\s*({CLASES})\s*({PARES})?\s*(.+)\s*")
 
     #2) NORMALIZAR LA ENTRADA DEL USUARIO
     direccion_clean = normaliza_texto(direccion)
@@ -149,23 +149,22 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     dir, num_raw = [p.strip() for p in direccion_clean.split(",", 1)]
     mnum = re.search(r"\d+", num_raw)
     if not mnum:
-        raise ValueError(f"Número inválido en: '{num_raw}' (se esperaba un entero)")
+        raise AddressNotFoundError(f"Número inválido en: '{num_raw}' (se esperaba un entero)")
     numero = int(mnum.group())
 
     #4) CASAR PATRÓN
     m = regex_via.match(dir)
     if not m: 
-        raise ValueError(f"No se reconoce la estructura de la vía: '{dir}'")
+        raise AddressNotFoundError(f"No se reconoce la estructura de la vía: '{dir}'")
     
     clase = m.group(1)
-    par = (m.group(2) or '').strip() or None
+    par = m.group(2) or ""
     via = m.group(3)
     
     #5) ENCONTRAR EN EL DF
-    par_cmp = par or ""  # en el CSV, ausencia de partícula suele ir como cadena vacía
     mask_exacta = (
         (callejero["VIA_CLASE"]  == clase) &
-        (callejero["VIA_PAR"].fillna("") == par_cmp) &
+        (callejero["VIA_PAR"].fillna("") == par) &
         (callejero["VIA_NOMBRE"] == via) &
         (callejero["NUMERO"].astype("Int64") == numero)
         )
@@ -176,7 +175,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     if len(candidatos) == 0: 
         mask_base = (
             (callejero["VIA_CLASE"] == clase) &
-            (callejero["VIA_PAR"]   == par) &
+            (callejero["VIA_PAR"] == par) &
             (callejero["NUMERO"].astype("Int64") == numero)
         )
         sub = callejero.loc[mask_base].copy()
@@ -244,10 +243,8 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     return G
 
 if __name__ == "__main__":
-    G = carga_grafo()
-    Gd = procesa_grafo(G)
-    pos = {n: (Gd.nodes[n]["x"], Gd.nodes[n]["y"]) for n in Gd.nodes()}
-    nx.draw(Gd, pos=pos, node_size=0, width=0.5)
-    plt.show()
+    callejero = carga_callejero()
+    lat, lon = busca_direccion("Calle Gran Via, 1", callejero)
+    print(lat, lon)
 
 
