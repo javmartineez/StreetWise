@@ -152,7 +152,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     #1) DEFINIR EL FORMATO QUE VAMOS A ACEPTAR 
     CLASES = r"AUTOVIA|AUTOPISTA|AVENIDA|CALLE|CAMINO|CARRETERA|GLORIETA|PASAJE|PASEO|PLAZA|RONDA|TRAVESIA"
     PARES = r"DE LAS|DE LOS|DE LA|DEL|DE"
-    regex_via = re.compile(rf"^\s*({CLASES})\s*({PARES})?\s*(.+)\s*")
+    regex_via = re.compile(rf"^\s*({CLASES})?\s*({PARES})?\s*(.+)\s*")
 
     #2) NORMALIZAR LA ENTRADA DEL USUARIO
     direccion_clean = normaliza_texto(direccion)
@@ -169,13 +169,13 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     if not m: 
         raise AddressNotFoundError(f"No se reconoce la estructura de la vía: '{dir}'")
     
-    clase = m.group(1)
+    clase = m.group(1) or ""
     par = m.group(2) or ""
     via = m.group(3)
     
     #5) ENCONTRAR EN EL DF
     mask_exacta = (
-        (callejero["VIA_CLASE"]  == clase) &
+        (callejero["VIA_CLASE"] == clase) &
         (callejero["VIA_PAR"] == par) &
         (callejero["VIA_NOMBRE"] == via) &
         (callejero["NUMERO"].astype("Int64") == numero)
@@ -186,8 +186,6 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     #6) Si el match no es exacto -> aplicamos fuzzy 
     if len(candidatos) == 0: 
         mask_base = (
-            (callejero["VIA_CLASE"] == clase) &
-            (callejero["VIA_PAR"] == par) &
             (callejero["NUMERO"].astype("Int64") == numero)
         )
         sub = callejero.loc[mask_base].copy()
@@ -256,7 +254,7 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
 
 if __name__ == "__main__":
     callejero = carga_callejero()
-    direccion = "Calle Gran Via, 1"
+    direccion = input("Direccion: ")
     lat, lon = busca_direccion(direccion, callejero)
     print(lat, lon)
 
