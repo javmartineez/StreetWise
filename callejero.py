@@ -253,10 +253,8 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     return G
 
 if __name__ == "__main__":
-    G = carga_grafo()
-    Gd = procesa_grafo(G)
-    pos = {n: (Gd.nodes[n]["x"], Gd.nodes[n]["y"]) for n in Gd.nodes()}
-    nx.draw(Gd, pos=pos, node_size=0, width=0.5)
-    plt.show()
+    callejero = carga_callejero()
+    lat, lon = busca_direccion("Calle Gran Via, 1", callejero)
+    print(lat, lon)
 
 
