@@ -22,6 +22,7 @@ import re
 import difflib
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 
 from typing import Tuple
 
@@ -30,20 +31,20 @@ STREET_FILE_NAME="direcciones.csv"
 PLACE_NAME = "Madrid, Spain"
 MAP_FILE_NAME="madrid.graphml"
 
-MAX_SPEEDS={'living_street': '20',
- 'residential': '30',
- 'primary_link': '40',
- 'unclassified': '40',
- 'secondary_link': '40',
- 'trunk_link': '40',
- 'secondary': '50',
- 'tertiary': '50',
- 'primary': '50',
- 'trunk': '50',
- 'tertiary_link':'50',
- 'busway': '50',
- 'motorway_link': '70',
- 'motorway': '100'}
+MAX_SPEEDS={'living_street': 20,
+ 'residential': 30,
+ 'primary_link': 40,
+ 'unclassified': 40,
+ 'secondary_link': 40,
+ 'trunk_link': 40,
+ 'secondary': 50,
+ 'tertiary': 50,
+ 'primary': 50,
+ 'trunk': 50,
+ 'tertiary_link':50,
+ 'busway': 50,
+ 'motorway_link': 70,
+ 'motorway': 100}
 
 
 class ServiceNotAvailableError(Exception):
@@ -216,6 +217,19 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
 ############## Parte 4 ##############
 
 
+def arreglo_vias(serie):
+    if isinstance(serie["highway"], list):
+        a = -1
+        b = "tipo"
+        for i in serie["highway"]:
+            val = MAX_SPEEDS[i]
+            if val > a:
+                a = val
+                b = i
+        serie["highway"] = b
+        serie["maxspeed"] = a
+    return serie 
+
 def carga_grafo() -> nx.MultiDiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
     Args: None
@@ -233,8 +247,7 @@ def carga_grafo() -> nx.MultiDiGraph:
     
     G = ox.load_graphml(filepath="madrid.graphml")
     
-    return G
-    
+    return G 
 
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
@@ -250,13 +263,43 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     loops = list(nx.selfloop_edges(G)) #bucles
     G.remove_edges_from(loops)
 
+    # df_grafo = nx.to_pandas_edgelist(G)
+    # df_grafo = df_grafo.apply(func=arreglo_vias, axis=1)
+    # #Hay que ver si podemos cambiar el diccionario MAX_SPEEDS para que sean numéricos y no tener que hacer tanta parafernalia
+    # df_grafo["maxspeed"] = df_grafo["highway"].map(MAX_SPEEDS)
+    # #df_grafo["maxspeed"] = df_grafo["maxspeed"].astype(np.int8)     NO se si merece la pena: cómo las velocidades no son superiores a 127 utilizamos int8 para ahorrar memoria
+    # df_grafo["time"] = df_grafo["length"] / (df_grafo["maxspeed"] * 1_000)
+    # G_rec = nx.from_pandas_edgelist(
+    # df_grafo,
+    # source="source",
+    # target="target",
+    # edge_attr=True,      # incluye todas las columnas restantes
+    # create_using=nx.DiGraph()
+    # )
+
+    # return G_rec
+    for u, v, data in G.edges(data=True):
+        if isinstance(data["highway"], list):
+            a = -1
+            b = "tipo"
+            for i in data["highway"]:
+                val = MAX_SPEEDS[i]
+                if val > a:
+                    a = val
+                    b = i
+                data["highway"] = b
+                data["maxspeed"] = a
+        else:
+            data["maxspeed"] = MAX_SPEEDS[data["highway"]]
+        data["time"] = data["length"] / (data["maxspeed"] * 1_000)
     return G
 
 if __name__ == "__main__":
-    callejero = carga_callejero()
-    direccion = input("Direccion: ")
-    lat, lon = busca_direccion(direccion, callejero)
-    print(lat, lon)
+    G = carga_grafo()
+    Gd = procesa_grafo(G)
+
+
+    
 
 
 
