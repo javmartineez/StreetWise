@@ -51,7 +51,33 @@ def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object
         Si G.dijksra(1)={2:1, 3:2, 4:1} entonces 1 es padre de 2 y de 4 y 2 es padre de 3.
         En particular, un camino mínimo desde 1 hasta 3 sería 1->2->3.
     """
-    pass
+    padres = {}
+    d = {}
+    visitados = {}
+
+    for v in G.nodes:
+        padres[v] = None
+        visitados[v] = None
+        d[v] = float('inf')
+
+    d[origen] = 0
+    
+    Q = []
+    heapq.heappush(Q, (0, origen))
+
+    while len(Q) != 0: 
+        dist_v, v = heapq.heappop(Q)   
+
+        if visitados[v] == False:
+            visitados[v] = True
+
+            for x in G.neighbors(v):
+                if d[x] > d[v] + peso[v,x]:
+                    d[x] = d[v] + peso[v, x]
+                    padres[x] = v
+                    heapq.heappush(Q, (d[x], x))
+
+    return padres    
 
 
 def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object,object],float], Callable[[nx.DiGraph,object,object],float]] ,origen:object,destino:object)->List[object]:
