@@ -21,8 +21,5 @@ prueba.ipynb
 # Ignorar grafo de madrid
 madrid.graphml
 
-#Ignorar apuntes 
-apuntes_practica_presencial.ipynb
-
 #ignorar la cache del hml
 cache/
