@@ -98,9 +98,25 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
     Raises:
         TypeError: Si origen o destino no son "hashable".
     """
-    pass
+    #A partir del diccionario que devuelve la función Dijkstra, queremos el camino mas corto de origen a destino
+    #Para ello, nos situamos en el nodo de destino y reconstruimos el camino al reves a través de cada padre 
 
+    padres = dijkstra(G, peso, origen)
 
+    #reconstruimos el camino
+    camino = []
+    actual = destino
+
+    while actual != origen: 
+        camino.append(actual)
+        actual = padres[actual]
+    
+    camino.append(origen)
+    camino.reverse()
+
+    return camino
+
+ 
 def prim(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> Dict[object,object]:
     """ Calcula un Árbol Abarcador Mínimo para el grafo pesado
     usando el algoritmo de Prim.
