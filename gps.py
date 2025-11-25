@@ -77,8 +77,22 @@ def calcular_camino(G: Union[nx.Graph, nx.DiGraph], origen: object, destino: obj
         print("Elige un método de ruta existente.")
         return
 
+def sacar_vector(G, u, v):
+    if not G[u][v]["geometry"]:
+        x0, y0, x1, y1 = G.nodes[u]["x"], G.nodes[u]["y"], G.nodes[v]["x"], G.nodes[v]["y"] 
+        vector = (x1-x0, y1 -y0)
+    
+    else:
+        geometria = list(G[u][v]["geometry"].coords)
+
+
+
+
 def lista_instrucciones(G: Union[nx.Graph, nx.DiGraph], camino: list[object]):
-    pass
+    edges = list(zip(camino[:-1], camino[1:]))
+
+
+        
 
 def mostrar_ruta_sobre_grafo():
     pass

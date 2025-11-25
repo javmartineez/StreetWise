@@ -282,14 +282,14 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
         if isinstance(data["highway"], list):
             a = -1
             b = "tipo"
-            for i in data["highway"]:
-                val = MAX_SPEEDS[i]
+            for i in range(len(data["highway"])):
+                val = MAX_SPEEDS[data["highway"][i]]
                 if val > a:
                     a = val
-                    b = i
+                    b = data["highway"][i]
                 data["highway"] = b
                 data["maxspeed"] = a
-        else:
+        elif data["maxspeed"] == "":
             data["maxspeed"] = MAX_SPEEDS[data["highway"]]
         data["time"] = data["length"] / (data["maxspeed"] * 1_000)
     return G
