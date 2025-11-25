@@ -68,12 +68,12 @@ def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object
     while len(Q) != 0: 
         dist_v, v = heapq.heappop(Q)   
 
-        if visitados[v] == False:
+        if not visitados[v]:
             visitados[v] = True
 
             for x in G.neighbors(v):
-                if d[x] > d[v] + peso[v,x]:
-                    d[x] = d[v] + peso[v, x]
+                if d[x] > d[v] + peso(G, v, x):
+                    d[x] = d[v] + peso(G, v, x)
                     padres[x] = v
                     heapq.heappush(Q, (d[x], x))
 
