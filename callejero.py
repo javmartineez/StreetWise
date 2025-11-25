@@ -249,6 +249,16 @@ def carga_grafo() -> nx.MultiDiGraph:
     
     return G 
 
+def comprobar_lista(clave: str, posicion: int, data: dict):
+    if isinstance(data[clave], list):
+        if len(data[clave]) < posicion:
+            data[clave] = data[clave][-1]
+        else:
+            data[clave] = data[clave][posicion]
+    
+def comprobar_existencia(clave: str, data: dict):
+    return clave in data
+
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
     Args:
@@ -282,16 +292,40 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
         if isinstance(data["highway"], list):
             a = -1
             b = "tipo"
+            indice = 0
             for i in range(len(data["highway"])):
                 val = MAX_SPEEDS[data["highway"][i]]
                 if val > a:
+                    indice = i
                     a = val
                     b = data["highway"][i]
-                data["highway"] = b
-                data["maxspeed"] = a
-        elif data["maxspeed"] == "":
+
+            data["highway"] = b
+
+            if comprobar_existencia("name", data):
+                comprobar_lista("name", i, data)
+        
+        if  not comprobar_existencia("name", data):
+            data["name"] = ""
+
+        elif isinstance(data["name"], list):
+            data["name"] = data["name"][0]
+        
+
+        if not comprobar_existencia("maxspeed", data):
             data["maxspeed"] = MAX_SPEEDS[data["highway"]]
-        data["time"] = data["length"] / (data["maxspeed"] * 1_000)
+            
+        elif isinstance(data["maxspeed"], list):
+            data["maxspeed"] = max(data["maxspeed"])
+        
+        try:
+            data["maxspeed"] = int(data["maxspeed"])
+        except (ValueError, TypeError):
+            data["maxspeed"] = MAX_SPEEDS[data["highway"]]
+
+
+        data["time"] = data["length"] / (data["maxspeed"] * 1_000)      #no hay que comprobar length porque no hay NaN en  el df
+    
     return G
 
 if __name__ == "__main__":
