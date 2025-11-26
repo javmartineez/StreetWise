@@ -111,9 +111,6 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
     # Calculamos el árbol de caminos mínimos
     padres = dijkstra(G, peso, origen)
     
-    if padres[destino] is None and destino != origen:
-        raise e.UnexistentPath (f"No existe un camino entre {origen} y {destino}")
-    
     camino = []
     actual = destino
     

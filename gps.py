@@ -298,32 +298,40 @@ def main():
     usuario el origen y destino deseado, calcular el camino mínimo entre estas y mostrar por pantalla el 
     mapa con la ruta.
     """
-    df = ca.carga_callejero()
-    G = ca.carga_grafo()
+    try:
+        df = ca.carga_callejero()
+    except FileNotFoundError as e:
+        print(e)
+    try:
+        G = ca.carga_grafo()
+    except ca.ServiceNotAvailableError as e:
+        print(e)
     G = ca.procesa_grafo(G)
 
     while True:
-        print("\n____NUEVA RUTA____\n")
-        inicio = usuario_nodo("origen")
-        if inicio:
-            lat1, lon1 = ca.busca_direccion(inicio, df)
-        else: return
+        try:
+            print("\n____NUEVA RUTA____\n")
+            inicio = usuario_nodo("origen")
+            if inicio:
+                lat1, lon1 = ca.busca_direccion(inicio, df)
+            else: return
 
-        final = usuario_nodo("destino")
-        if final:
-            lat2, lon2 = ca.busca_direccion(final, df)
-        else: return
+            final = usuario_nodo("destino")
+            if final:
+                lat2, lon2 = ca.busca_direccion(final, df)
+            else: return
 
-        origen = ox.distance.nearest_nodes(G, X=lon1, Y=lat1)
-        destino = ox.distance.nearest_nodes(G, X=lon2, Y=lat2)
+            origen = ox.distance.nearest_nodes(G, X=lon1, Y=lat1)
+            destino = ox.distance.nearest_nodes(G, X=lon2, Y=lat2)
 
-        camino = calcular_camino(G, origen, destino)
-        direcciones = lista_instrucciones(G, camino)
+            camino = calcular_camino(G, origen, destino)
+            direcciones = lista_instrucciones(G, camino)
+            for i in direcciones:
+                print(i)
 
-        for i in direcciones:
-            print(i)
-
-        mostrar_camino_sobre_grafo(G, camino)
+            mostrar_camino_sobre_grafo(G, camino)
+        except (ca.AddressNotFoundError, ca.ServiceNotAvailableError) as e:
+            print(e)
 
 
 
