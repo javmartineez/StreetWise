@@ -1,5 +1,4 @@
 from typing import List,Tuple,Dict,Callable,Union
-import re
 import os
 
 import osmnx as ox
@@ -53,6 +52,7 @@ def tiempo_optimizado(G: Union[nx.Graph, nx.DiGraph], node1: object, node2: obje
     """
     return G[node1][node2]["time"] + 0.8*30
 
+
 def usuario_nodo(tipo_nodo: str):
     """
     Pregunta al usuario que el nodo a buscar.
@@ -94,6 +94,8 @@ def calcular_camino(G: Union[nx.Graph, nx.DiGraph], origen: object, destino: obj
             return camino_minimo(G, opciones[ruta], origen, destino)
         print("Elige un método de ruta existente.")
 
+    
+
 def sacar_direccion(v0: Tuple, v1: Tuple):
     """
     Calcula la dirección del segundo vector respecto al primero,, utilizando las propiedades del
@@ -119,6 +121,7 @@ def sacar_direccion(v0: Tuple, v1: Tuple):
         return "derecha"
     else:
         return "recto"
+    
     
 def sacar_vector(G: Union[nx.Graph, nx.DiGraph], u: object, v: object, final: bool = True):
     """
@@ -291,8 +294,9 @@ def mostrar_camino_sobre_grafo(G, camino):
 
 def main():
     """
-    Función main que ejecuta todo el código. Encargada de generar el DataFrame y DiGrafo, preguntar al
-    usuario localizaciones, calcular el camino mínimo entre estas y mostrar por pantalla el mapa con la ruta.
+    Función principal de ejecucion encargada de generar el DataFrame y el grafo de calles, preguntar al
+    usuario el origen y destino deseado, calcular el camino mínimo entre estas y mostrar por pantalla el 
+    mapa con la ruta.
     """
     df = ca.carga_callejero()
     G = ca.carga_grafo()
@@ -315,10 +319,11 @@ def main():
 
         camino = calcular_camino(G, origen, destino)
         direcciones = lista_instrucciones(G, camino)
+
         for i in direcciones:
             print(i)
 
-        mostrar_ruta_sobre_grafo(G, camino)
+        mostrar_camino_sobre_grafo(G, camino)
 
 
 

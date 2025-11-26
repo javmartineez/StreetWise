@@ -121,6 +121,7 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
         camino.append(actual)
         actual = padres[actual]         #recorremos el camino en orden inverso (del destino al orgien)
     
+    
     camino.reverse()
     return camino
  
