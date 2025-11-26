@@ -57,41 +57,8 @@ class AddressNotFoundError(Exception):
     pass
 
 
+
 ############## Parte 2 ##############
-
-
-def carga_callejero() -> pd.DataFrame:
-    """ Función que carga el callejero de Madrid, lo procesa y devuelve
-    un DataFrame con los datos procesados
-    
-    Args: None
-    Returns:
-        Dict[object,object]: Devuelve un diccionario que indica, para cada vértice del
-            grafo, qué vértice es su padre en el árbol abarcador mínimo.
-    Raises:
-        FileNotFoundError si el fichero csv con las direcciones no existe
-    """
-    callejero = pd.read_csv("direcciones.csv", sep= ";", encoding= "latin1")
-    callejero = callejero[["VIA_CLASE","VIA_PAR","VIA_NOMBRE","NUMERO","LATITUD","LONGITUD"]]
-    regex = re.compile(r"(\d+)[°º]\s*(\d+)\'(\d+\.?\d*)\'\'\s*([NSEW])")
-
-    aux = pd.DataFrame()
-    cols_la = ["la_grados", "la_minutos", "la_segundos", "la_dir"]
-    cols_lo = ["lo_grados", "lo_minutos", "lo_segundos", "lo_dir"]
-
-    aux[cols_la] = callejero["LATITUD"].str.extract(regex)
-    aux[cols_lo] = callejero["LONGITUD"].str.extract(regex)
-    aux[cols_la[:-1] + cols_lo[:-1]] = aux[cols_la[:-1] + cols_lo[:-1]].astype("float")
-    callejero["LATITUD"] = gmd_a_grados(aux[cols_la])
-    callejero["LONGITUD"] = gmd_a_grados(aux[cols_lo])
-
-    #cols = ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]
-    #callejero[cols] = callejero[cols].fillna("").apply(lambda col: col.map(normaliza_texto))
-    for col in ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]:
-        callejero[col] = callejero[col].fillna("").map(normaliza_texto)
-
-    return callejero
-
 
 def gmd_a_grados(data: pd.DataFrame) -> pd.Series:
     """
@@ -108,8 +75,6 @@ def gmd_a_grados(data: pd.DataFrame) -> pd.Series:
     direccion = data.iloc[:,-1]
     direccion = direccion.map({"N" : 1, "E" : 1, "S" : -1, "W" : -1})
     return valores.sum(axis=1)*direccion
-
-
 
 def normaliza_texto(cadena: str) -> str:
     """
@@ -131,7 +96,40 @@ def normaliza_texto(cadena: str) -> str:
     }
     return "".join(reemplazos.get(c, c) for c in s)
 
+def carga_callejero() -> pd.DataFrame:
+    """ Función que carga el callejero de Madrid, lo procesa y devuelve
+    un DataFrame con los datos procesados
+    
+    Args: None
+    Returns:
+        Dict[object,object]: Devuelve un diccionario que indica, para cada vértice del
+            grafo, qué vértice es su padre en el árbol abarcador mínimo.
+    Raises:
+        FileNotFoundError si el fichero csv con las direcciones no existe
+    """
+    if not os.path.exists("direcciones.csv"):
+        raise FileNotFoundError("El archivo direcciones.csv no existe")
+    
+    callejero = pd.read_csv("direcciones.csv", sep= ";", encoding= "latin1", usecols=["VIA_CLASE","VIA_PAR","VIA_NOMBRE","NUMERO","LATITUD","LONGITUD"])
 
+    regex = re.compile(r"(\d+)[°º]\s*(\d+)\'(\d+\.?\d*)\'\'\s*([NSEW])")
+
+    aux = pd.DataFrame()            #crea un dataframe auxiliar para transformar las cordenadas de longitud y latitud
+    cols_la = ["la_grados", "la_minutos", "la_segundos", "la_dir"]
+    cols_lo = ["lo_grados", "lo_minutos", "lo_segundos", "lo_dir"]
+
+    aux[cols_la] = callejero["LATITUD"].str.extract(regex)      #extrae cada parte de las coordenadas con regex
+    aux[cols_lo] = callejero["LONGITUD"].str.extract(regex)
+
+    aux[cols_la[:-1] + cols_lo[:-1]] = aux[cols_la[:-1] + cols_lo[:-1]].astype("float")     #cambiamos a tipo float en todas menos la dirección
+    callejero["LATITUD"] = gmd_a_grados(aux[cols_la])
+    callejero["LONGITUD"] = gmd_a_grados(aux[cols_lo])
+
+
+    for col in ["VIA_CLASE", "VIA_PAR", "VIA_NOMBRE"]:
+        callejero[col] = callejero[col].fillna("").map(normaliza_texto)
+
+    return callejero
 
 def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]:
     """ Función que busca una dirección, dada en el formato
@@ -216,19 +214,8 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
 
 ############## Parte 4 ##############
 
-
-def arreglo_vias(serie):
-    if isinstance(serie["highway"], list):
-        a = -1
-        b = "tipo"
-        for i in serie["highway"]:
-            val = MAX_SPEEDS[i]
-            if val > a:
-                a = val
-                b = i
-        serie["highway"] = b
-        serie["maxspeed"] = a
-    return serie 
+def comprobar_existencia(clave: str, data: dict):
+    return clave in data
 
 def carga_grafo() -> nx.MultiDiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
@@ -242,7 +229,10 @@ def carga_grafo() -> nx.MultiDiGraph:
     existencia = os.path.exists(ruta_grafo)
 
     if not existencia:  #Cargamos el grafo de open street map si no se ha descargado previamente
-        G = ox.graph_from_place("Madrid, Spain", network_type="drive")
+        try:
+            G = ox.graph_from_place("Madrid, Spain", network_type="drive")
+        except Exception:
+            raise ServiceNotAvailableError("No se ha podido recuperar el grafo de OpenStreetMap")
         ox.save_graphml(G, filepath="madrid.graphml")
     
     G = ox.load_graphml(filepath="madrid.graphml")
@@ -250,14 +240,27 @@ def carga_grafo() -> nx.MultiDiGraph:
     return G 
 
 def comprobar_lista(clave: str, posicion: int, data: dict):
+    """
+    Comprueba si el valor del diccionario "data" con clave "clave" es una lista.
+    En caso de serlo cambia su valor por el valor "posicion" de la lista. Si es menor
+    que el tamaño de la lista coge el último.
+    
+    Args:
+        -clave: clave del diccionario.
+        -posicion: índice del valor de la lista que queremos.
+        -data: diccionario con toda la información.
+    
+    Returns: None
+
+    Raises: None
+    """
     if isinstance(data[clave], list):
         if len(data[clave]) < posicion:
             data[clave] = data[clave][-1]
         else:
             data[clave] = data[clave][posicion]
     
-def comprobar_existencia(clave: str, data: dict):
-    return clave in data
+
 
 def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     """ Función que recupera el quiver de calles de Madrid de OpenStreetMap.
@@ -273,29 +276,14 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
     loops = list(nx.selfloop_edges(G)) #bucles
     G.remove_edges_from(loops)
 
-    # df_grafo = nx.to_pandas_edgelist(G)
-    # df_grafo = df_grafo.apply(func=arreglo_vias, axis=1)
-    # #Hay que ver si podemos cambiar el diccionario MAX_SPEEDS para que sean numéricos y no tener que hacer tanta parafernalia
-    # df_grafo["maxspeed"] = df_grafo["highway"].map(MAX_SPEEDS)
-    # #df_grafo["maxspeed"] = df_grafo["maxspeed"].astype(np.int8)     NO se si merece la pena: cómo las velocidades no son superiores a 127 utilizamos int8 para ahorrar memoria
-    # df_grafo["time"] = df_grafo["length"] / (df_grafo["maxspeed"] * 1_000)
-    # G_rec = nx.from_pandas_edgelist(
-    # df_grafo,
-    # source="source",
-    # target="target",
-    # edge_attr=True,      # incluye todas las columnas restantes
-    # create_using=nx.DiGraph()
-    # )
-
-    # return G_rec
-    for u, v, data in G.edges(data=True):
+    for _, _, data in G.edges(data=True):       #recorre todas las aristas del grafo
         if isinstance(data["highway"], list):
             a = -1
             b = "tipo"
             indice = 0
             for i in range(len(data["highway"])):
                 val = MAX_SPEEDS[data["highway"][i]]
-                if val > a:
+                if val > a:                                 #se va quedando con el tipo de vía con mayor límite de velocidad
                     indice = i
                     a = val
                     b = data["highway"][i]
@@ -303,7 +291,7 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
             data["highway"] = b
 
             if comprobar_existencia("name", data):
-                comprobar_lista("name", i, data)
+                comprobar_lista("name", indice, data)
         
         if  not comprobar_existencia("name", data):
             data["name"] = ""
@@ -324,15 +312,9 @@ def procesa_grafo(multidigrafo:nx.MultiDiGraph) -> nx.DiGraph:
             data["maxspeed"] = MAX_SPEEDS[data["highway"]]
 
 
-        data["time"] = data["length"] / (data["maxspeed"] * 1_000)      #no hay que comprobar length porque no hay NaN en  el df
+        data["time"] = data["length"] / (data["maxspeed"] * 1_000)      #genera una nueva clave con el tiempo de la arista
     
     return G
-
-if __name__ == "__main__":
-    G = carga_grafo()
-    Gd = procesa_grafo(G)
-
-
     
 
 
