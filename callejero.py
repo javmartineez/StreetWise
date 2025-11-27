@@ -143,6 +143,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     Returns:
         Tuple[float,float]: Par de float (latitud,longitud) de la dirección buscada, expresados en grados
     Raises:
+        ValueError: Si el formato de la dirección no contiene coma o número
         AdressNotFoundError: Si la dirección no existe en la base de datos
     Example:
         busca_direccion("Calle de Alberto Aguilera, 23", data)=(40.42998055555555,3.7112583333333333)
@@ -157,7 +158,16 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
     direccion_clean = normaliza_texto(direccion)
 
     #3) SEPARAR VÍA Y NÚMERO
-    dir, num_raw = [p.strip() for p in direccion_clean.split(",", 1)]
+    # Verificar que existe la coma
+    if "," not in direccion_clean:
+        raise ValueError("El formato de la dirección debe ser 'calle, numero'. Falta la coma separadora.")
+    
+    partes = direccion_clean.split(",", 1)
+    if len(partes) < 2 or not partes[1].strip():
+        raise ValueError("El formato de la dirección debe ser 'calle, numero'. Falta el número de la calle.")
+    
+    dir, num_raw = [p.strip() for p in partes]
+    
     mnum = re.search(r"\d+", num_raw)
     if not mnum:
         raise AddressNotFoundError(f"Número inválido en: '{num_raw}' (se esperaba un entero)")
@@ -190,7 +200,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
         sub = callejero.loc[mask_base].copy()
 
         if len(sub) == 0:
-            raise AddressNotFoundError("Calle no encontrada ni siquiera de forma aproximada")
+            raise AddressNotFoundError("Dirección no encontrada")
 
         # calculamos similitud para cada nombre distinto
         mejor_score = -1.0
@@ -202,7 +212,7 @@ def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]
                 mejor_nombre = nombre_candidato
 
         if mejor_score < 0.7:
-            raise AddressNotFoundError("Calle no encontrada ni siquiera de forma aproximada")
+            raise AddressNotFoundError("Dirección no encontrada")
 
         candidatos = sub.loc[sub["VIA_NOMBRE"] == mejor_nombre, ["LATITUD", "LONGITUD"]]
 
@@ -255,7 +265,7 @@ def comprobar_lista(clave: str, posicion: int, data: dict):
     Raises: None
     """
     if isinstance(data[clave], list):
-        if len(data[clave]) < posicion:
+        if len(data[clave]) <= posicion:
             data[clave] = data[clave][-1]
         else:
             data[clave] = data[clave][posicion]

@@ -92,7 +92,8 @@ def calcular_camino(G: Union[nx.Graph, nx.DiGraph], origen: object, destino: obj
         """)
         if ruta in opciones:
             return camino_minimo(G, opciones[ruta], origen, destino)
-        print("Elige un método de ruta existente.")
+        else:
+            print("Elige un método de ruta existente.")
 
     
 
@@ -312,6 +313,7 @@ def main():
         try:
             print("\n____NUEVA RUTA____\n")
             inicio = usuario_nodo("origen")
+
             if inicio:
                 lat1, lon1 = ca.busca_direccion(inicio, df)
             else: return
@@ -320,6 +322,7 @@ def main():
             if final:
                 lat2, lon2 = ca.busca_direccion(final, df)
             else: return
+  
 
             origen = ox.distance.nearest_nodes(G, X=lon1, Y=lat1)
             destino = ox.distance.nearest_nodes(G, X=lon2, Y=lat2)
@@ -330,7 +333,7 @@ def main():
                 print(i)
 
             mostrar_camino_sobre_grafo(G, camino)
-        except (ca.AddressNotFoundError, ca.ServiceNotAvailableError) as e:
+        except (ca.AddressNotFoundError, ca.ServiceNotAvailableError, ValueError) as e:
             print(e)
 
 

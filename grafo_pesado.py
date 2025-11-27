@@ -18,7 +18,6 @@ import networkx as nx
 import sys
 
 import heapq #Librería para la creación de colas de prioridad
-import excepciones as e
 
 INFTY=sys.float_info.max #Distincia "infinita" entre nodos de un grafo
 
@@ -52,6 +51,11 @@ def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object
         Si G.dijksra(1)={2:1, 3:2, 4:1} entonces 1 es padre de 2 y de 4 y 2 es padre de 3.
         En particular, un camino mínimo desde 1 hasta 3 sería 1->2->3.
     """
+    # Verificar si el origen es hasheable
+    try:
+        hash(origen)
+    except TypeError:
+        raise TypeError(f"El origen no es hasheable: {type(origen).__name__}")
     
     padres = {}
     d = {}
@@ -61,7 +65,7 @@ def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object
 
     for v in G.nodes():
         padres[v] = None
-        d[v] = float('inf')
+        d[v] = INFTY
     
     d[origen] = 0
     
@@ -107,6 +111,17 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
     Raises:
         TypeError: Si origen o destino no son "hashable".
     """
+    # Verificar si origen y destino son hasheables
+    try:
+        hash(origen)
+    except TypeError:
+        raise TypeError(f"El origen no es hasheable: {type(origen).__name__}")
+    
+    try:
+        hash(destino)
+    except TypeError:
+        raise TypeError(f"El destino no es hasheable: {type(destino).__name__}")
+    
 
     # Calculamos el árbol de caminos mínimos
     padres = dijkstra(G, peso, origen)
@@ -118,7 +133,7 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
         camino.append(actual)
         actual = padres[actual]         #recorremos el camino en orden inverso (del destino al orgien)
     
-    
+
     camino.reverse()
     return camino
  
@@ -150,7 +165,7 @@ def prim(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> Dict[objec
   
     for v in G.nodes():
         padres[v] = None
-        coste_min[v] = float('inf')
+        coste_min[v] = INFTY
     
     coste_min[root] = 0
     heapq.heappush(Q, (0, contador, root))
