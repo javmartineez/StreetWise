@@ -76,6 +76,7 @@ def gmd_a_grados(data: pd.DataFrame) -> pd.Series:
     direccion = direccion.map({"N" : 1, "E" : 1, "S" : -1, "W" : -1})
     return valores.sum(axis=1)*direccion
 
+
 def normaliza_texto(cadena: str) -> str:
     """
     Función encargada de normalizar el texto a mayúsculas y sin tildes
@@ -95,6 +96,7 @@ def normaliza_texto(cadena: str) -> str:
         "Ñ": "N",
     }
     return "".join(reemplazos.get(c, c) for c in s)
+
 
 def carga_callejero() -> pd.DataFrame:
     """ Función que carga el callejero de Madrid, lo procesa y devuelve
@@ -130,6 +132,7 @@ def carga_callejero() -> pd.DataFrame:
         callejero[col] = callejero[col].fillna("").map(normaliza_texto)
 
     return callejero
+
 
 def busca_direccion(direccion:str, callejero:pd.DataFrame) -> Tuple[float,float]:
     """ Función que busca una dirección, dada en el formato
@@ -248,6 +251,7 @@ def carga_grafo() -> nx.MultiDiGraph:
     G = ox.load_graphml(filepath="madrid.graphml")
     
     return G 
+    
 
 def comprobar_lista(clave: str, posicion: int, data: dict):
     """
