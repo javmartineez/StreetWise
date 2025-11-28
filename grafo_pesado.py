@@ -6,8 +6,8 @@ ICAI, Universidad Pontificia Comillas
 
 Grupo: GP09B
 Integrantes:
-    - Javier Mochales López
     - Javier Martínez Berenguer
+    - Javier Mochales López
 
 Descripción:
 Librería para el análisis de grafos pesados.
@@ -232,11 +232,3 @@ def kruskal(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> List[Tu
                 C[w] = componente_unida
     
     return aristas_aam
-
-
-
-if __name__ == "__main__":
-    import callejero as ca
-    G = ca.carga_grafo()
-    aristas = kruskal(G, 1)
-    print(aristas[0])
