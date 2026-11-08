@@ -1,19 +1,19 @@
 """
 test_grafo.py
 
-Matemática Discreta - IMAT
+Discrete Mathematics - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Descripción:
-Script para verificación básica del funcionamiento de la librería grafo_pesado.py.
+Description:
+Script for a basic check of the grafo_pesado.py library.
 
-Las listas "vertices" y "aristas" describen un grafo (dirigido o no dirigido).
-El script construye dicho grafo tomando pesos aleatorios en las aristas
-usando la librería grafo.py.
+The "vertices" and "aristas" lists describe a graph (directed or undirected).
+The script builds that graph with random edge weights
+using the grafo.py library.
 
-Después realiza vairas operaciones básicas sobre el grafo y ejecuta sobre él:
+It then performs several basic operations on the graph and runs:
     - Dijkstra
-    - Búsqueda de un camino mínimo con Dijkstra
+    - Shortest path search with Dijkstra
     - Prim
     - Kruskal
 """
@@ -28,23 +28,23 @@ MAX_PESO_ARISTA=12
 
 
 
-############ Funciones de peso de ejemplo ############
+############ Example weight functions ############
 
-#Función que devuelve un peso constante para todas las aristas
+#Function returning a constant weight for every edge
 def peso_constante(G:Union[nx.Graph, nx.DiGraph], origen:object, destino:object):
     return 1
 
-#Función que recupera el peso aleatorio guardado en el grafo
+#Function retrieving the random weight stored in the graph
 def peso_aleatorio(G:Union[nx.Graph, nx.DiGraph], origen:object, destino:object):
     return G[origen][destino]["peso"]
 
 
-#Listas de vértices y aristas del grafo
+#Lists of graph vertices and edges
 dirigido=False
 vertices=[1,2,3,'a',5,6]
 aristas=[(1,2),(1,3),(1,'a'),(1,5),(2,'a'),(3,'a'),(3,5),(5,6)]
 
-#Creación del grafo
+#Graph creation
 if dirigido:
     G=nx.DiGraph()
 else:
@@ -53,20 +53,20 @@ else:
 G.add_nodes_from(vertices)   
 
 for a in aristas:
-    #Guardamos un peso aleatorio en cada arista
+    #Store a random weight on each edge
     G.add_edge(a[0],a[1],peso=random.randrange(MIN_PESO_ARISTA,MAX_PESO_ARISTA))
-    #Imprimimos el contenido de las aristas creadas para ver el peso asignaado
+    #Print the created edges to see the assigned weight
     print(a[0],a[1],":",G[a[0]][a[1]])
 
 
-#Dijkstra y camino mínimo con peso constante
+#Dijkstra and shortest path with constant weight
 acm=grafo_pesado.dijkstra(G,peso_constante,1)
 print(acm)
 
 camino=grafo_pesado.camino_minimo(G,peso_constante,1,5)
 print(camino)
 
-#Dijkstra y camino mínimo con peso aleatorio
+#Dijkstra and shortest path with random weight
 acm_rng=grafo_pesado.dijkstra(G,peso_aleatorio,1)
 print(acm_rng)
 
@@ -76,7 +76,7 @@ print(camino_rng)
 
 
 if(not dirigido):
-    #Árbol abarcador mínimo
+    #Minimum spanning tree
     aam=grafo_pesado.kruskal(G,peso_constante)
     print(aam)
 

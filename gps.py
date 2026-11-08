@@ -14,50 +14,50 @@ from grafo_pesado import camino_minimo
 
 def metros(G: Union[nx.Graph, nx.DiGraph], node1: object, node2: object):
     """
-    Función de peso en base a la distancia recorrida.
+    Weight function based on the distance travelled.
 
     Args:
-        -G: grafo que se estudia.
-        -node1: Nodo origen del grafo G.
-        -node2: Nodo destino del grafo G.
+        -G: graph under study.
+        -node1: source node of graph G.
+        -node2: destination node of graph G.
 
-    Return: Peso de la arista (nodo1, nodo2)
+    Return: weight of the edge (nodo1, nodo2)
     """
     return G[node1][node2]["length"]
 
 def tiempo(G: Union[nx.Graph, nx.DiGraph], node1: object, node2: object):
     """
-    Función de peso en base al tiempo circulando.
+    Weight function based on driving time.
 
     Args:
-        -G: grafo que se estudia.
-        -node1: Nodo origen del grafo G.
-        -node2: Nodo destino del grafo G.
+        -G: graph under study.
+        -node1: source node of graph G.
+        -node2: destination node of graph G.
 
-    Return: Peso de la arista (nodo1, nodo2)
+    Return: weight of the edge (nodo1, nodo2)
     """
     return G[node1][node2]["time"]
 
 def tiempo_optimizado(G: Union[nx.Graph, nx.DiGraph], node1: object, node2: object):
     """
-    Función de peso en base al tiempo circulando optimizando semáforos y señales
-    con una probabilidad de pararse 30s del 80%.
+    Weight function based on driving time, accounting for traffic lights and signs
+    with an 80% probability of stopping for 30 s.
 
     Args:
-        -G: grafo que se estudia.
-        -node1: Nodo origen del grafo G.
-        -node2: Nodo destino del grafo G.
+        -G: graph under study.
+        -node1: source node of graph G.
+        -node2: destination node of graph G.
 
-    Return: Peso de la arista (nodo1, nodo2)
+    Return: weight of the edge (nodo1, nodo2)
     """
     return G[node1][node2]["time"] + 0.8*30
 
 
 def usuario_nodo(tipo_nodo: str):
     """
-    Pregunta al usuario que el nodo a buscar.
+    Asks the user for the node to search for.
     """
-    palabra = input(f"Ubicación del {tipo_nodo}: ")
+    palabra = input(f"Location of the {tipo_nodo}: ")
     if palabra == "":
         return
     return palabra
@@ -65,17 +65,17 @@ def usuario_nodo(tipo_nodo: str):
 
 def calcular_camino(G: Union[nx.Graph, nx.DiGraph], origen: object, destino: object):
     """
-    Calcula el camino mínimo entre dos nodos en tres modos distintos. Por distancia mínima en metros,
-    por tiempo mínimo o por tiempo mínimo optimizando la probabilidad de semáforos o señalización en
-    los nodos.
+    Computes the shortest path between two nodes in three different modes: minimum distance in metres,
+    minimum time, or minimum time accounting for the probability of traffic lights or signs at
+    the nodes.
 
     Args:
-        -G: Grafo donde se encuentran todos los nodos/aristas del mapa.
-        -origen: Nodo origen.
-        -destino: Nodo destino.
-    
+        -G: graph holding all the nodes/edges of the map.
+        -origen: source node.
+        -destino: destination node.
+
     Returns:
-        Camino de nodos mínimo entre origen y destino (en base al método seleccionado).
+        Shortest path of nodes between origen and destino (according to the selected method).
 
     Raises: None
     """
@@ -85,30 +85,30 @@ def calcular_camino(G: Union[nx.Graph, nx.DiGraph], origen: object, destino: obj
         "3": tiempo_optimizado
     }
     while True:
-        ruta = input(""" Modo de cálculo de ruta(1,2,3):
-        1: Ruta más corta entre las direcciones: Se considera la longitud total.
-        2. Ruta más rápida entre las direcciones: Se considera el tiempo del viaje.
-        3. Ruta más rápida optimizando semáforos: Se considera el tiempo del viaje.
+        ruta = input(""" Route calculation mode (1,2,3):
+        1: Shortest route between the addresses: uses the total length.
+        2. Fastest route between the addresses: uses the travel time.
+        3. Fastest route accounting for traffic lights: uses the travel time.
         """)
         if ruta in opciones:
             return camino_minimo(G, opciones[ruta], origen, destino)
         else:
-            print("Elige un método de ruta existente.")
+            print("Choose an existing route method.")
 
     
 
 def sacar_direccion(v0: Tuple, v1: Tuple):
     """
-    Calcula la dirección del segundo vector respecto al primero,, utilizando las propiedades del
-    producto vectorial. Si da positivo esta a la izquierda, si es negativo a la derecha y en
-    caso de ser nulo son paralelos.
+    Computes the direction of the second vector with respect to the first one, using the properties of the
+    cross product. If it is positive it is to the left, if it is negative to the right, and if it is
+    zero they are parallel.
 
     Args:
-        -v0: vector de la primera arista.
-        -v1: vector de la segunda arista.
-    
+        -v0: vector of the first edge.
+        -v1: vector of the second edge.
+
     Returns:
-        Dirección de v1 respecto de v0.
+        Direction of v1 with respect to v0.
     
     Raises: None.
     """
@@ -117,43 +117,43 @@ def sacar_direccion(v0: Tuple, v1: Tuple):
 
     z = x0*y1 - y0*x1
     if z > 0:
-        return "izquierda"
+        return "left"
     elif z < 0:
-        return "derecha"
+        return "right"
     else:
-        return "recto"
+        return "straight"
     
     
 def sacar_vector(G: Union[nx.Graph, nx.DiGraph], u: object, v: object, final: bool = True):
     """
-    Obtiene el vector dirección de una arista del Grafo a estudiar.
+    Gets the direction vector of an edge of the graph under study.
 
     Args:
-        -G: Grafo donde se encuentran todos los nodos/aristas del mapa.
-        -u: nodo del inicio de la arista.
-        -v: nodo del final de la arista.
-        -final: booleano para coger el vector de los últimos o primeros puntos.
+        -G: graph holding all the nodes/edges of the map.
+        -u: start node of the edge.
+        -v: end node of the edge.
+        -final: whether to take the vector from the last or the first points.
 
     Returns:
-        -vector: vector que representa la dirección de la arista en la intersección (puede ser
-        del principio o del final de la arista).
+        -vector: vector representing the direction of the edge at the intersection (it can be
+        at the start or at the end of the edge).
 
     Raises: None 
     """
-    #En caso de no tener la geometría de la arista utiliza los puntos de los nodos
+    #If the edge has no geometry, use the node coordinates
     if "geometry" not in G[u][v]:
         x0, y0, x1, y1 = G.nodes[u]["x"], G.nodes[u]["y"], G.nodes[v]["x"], G.nodes[v]["y"] 
     
     else:
         geometria = list(G[u][v]["geometry"].coords)
 
-        if len(geometria) < 2:      #comprobamos el caso en el que hay menos de dos puntos para que no explote el código
+        if len(geometria) < 2:      #handle the case with fewer than two points so the code does not crash
             x0, y0, x1, y1 = G.nodes[u]["x"], G.nodes[u]["y"], G.nodes[v]["x"], G.nodes[v]["y"] 
         else:
-            if final:           #escogemos los dos últimos puntos si es la primera arista de la intersección
+            if final:           #take the last two points if it is the first edge of the intersection
                 x0, y0 = geometria[-2]
                 x1, y1 = geometria[-1]
-            else:               #escogemos los dos primeros puntos si es la segunda arista de la intersección
+            else:               #take the first two points if it is the second edge of the intersection
                 x0, y0 = geometria[0]
                 x1, y1 = geometria[1]
         
@@ -163,40 +163,40 @@ def sacar_vector(G: Union[nx.Graph, nx.DiGraph], u: object, v: object, final: bo
 
 def instruccion(instrucciones: list, name: str, direccion: str, dist: int = None):
     """
-    incluye una instrucción a la lista de instrucciones.
+    Adds an instruction to the list of instructions.
 
     Args:
-        -instrucciones: lista con todas las instrucciones.
-        -name: nombre de la calle.
-        -direccion: tipo de intersección entre las calles.
-        -dist: distancia recorrida durante la instrucción.
-    
-    Return: se incluye la instrucción a instrucciones
+        -instrucciones: list with all the instructions.
+        -name: street name.
+        -direccion: type of turn between the streets.
+        -dist: distance travelled during the instruction.
+
+    Return: the instruction is appended to instrucciones
 
     Raises: None
     """
-    if direccion == "recto":
+    if direccion == "straight":
         if name != "":
-            instrucciones.append(f"Sigue recto {dist} metros por {name}")
+            instrucciones.append(f"Continue straight for {dist} metres on {name}")
         else:
-            instrucciones.append(f"Sigue recto {dist} metros")
+            instrucciones.append(f"Continue straight for {dist} metres")
     else:
         if name != "":
-            instrucciones.append(f"Gira a la {direccion} por {name}")
+            instrucciones.append(f"Turn {direccion} onto {name}")
         else:
-            instrucciones.append(f"Gira a la {direccion}")
+            instrucciones.append(f"Turn {direccion}")
 
 
 def lista_instrucciones(G: Union[nx.Graph, nx.DiGraph], camino: list[object]):
     """
-    Genera la lista de instrucciones a partir del Grafo y un camino de nodos.
+    Generates the list of instructions from the graph and a path of nodes.
 
     Args:
-        -G: Grafo donde se encuentran todos los nodos/aristas del mapa.
-        -camino: lista de nodos de la ruta establecida.
-    
+        -G: graph holding all the nodes/edges of the map.
+        -camino: list of nodes of the chosen route.
+
     Returns:
-        instrucciones: lista con todas las instrucciones para el camino de nodos dado.
+        instrucciones: list with all the instructions for the given path of nodes.
     
     Raises: None
     """
@@ -219,17 +219,17 @@ def lista_instrucciones(G: Union[nx.Graph, nx.DiGraph], camino: list[object]):
             dist1 = round(G[nodo11][nodo12]["length"], 0)
             dist2 = round(G[nodo21][nodo22]["length"], 0)
 
-            if nombre1 == nombre2:      #Si seguimos
+            if nombre1 == nombre2:      #If we stay on the same street
                 length += dist1
             else:
                 length += dist1
-                instruccion(instrucciones, nombre1, "recto", length)
+                instruccion(instrucciones, nombre1, "straight", length)
 
                 v1 = sacar_vector(G, nodo11, nodo12, True)
                 v2 = sacar_vector(G, nodo21, nodo22, False)
                 direccion = sacar_direccion(v1,v2)
                             
-                if direccion == "recto":
+                if direccion == "straight":
                     length = 0
 
                 else:
@@ -238,10 +238,10 @@ def lista_instrucciones(G: Union[nx.Graph, nx.DiGraph], camino: list[object]):
 
         if nombre1 == nombre2:
             length += dist2
-            instruccion(instrucciones, nombre1, "recto", length)
+            instruccion(instrucciones, nombre1, "straight", length)
         else:
-            instruccion(instrucciones, nombre2, "recto", dist2)
-        instrucciones.append("Has llegado a tu destino!")
+            instruccion(instrucciones, nombre2, "straight", dist2)
+        instrucciones.append("You have arrived at your destination!")
 
     elif len(edges) == 1:
         nodo1 = edges[0][0]
@@ -249,43 +249,43 @@ def lista_instrucciones(G: Union[nx.Graph, nx.DiGraph], camino: list[object]):
         nombre = G[nodo1][nodo2]["name"]
         dist = round(G[nodo1][nodo2]["length"], 0)
 
-        instruccion(instrucciones, nombre, "recto", dist)
-        instrucciones.append("Has llegado a tu destino!")
+        instruccion(instrucciones, nombre, "straight", dist)
+        instrucciones.append("You have arrived at your destination!")
 
     else:
-        instrucciones.append("Estás ya en tu destino!")
+        instrucciones.append("You are already at your destination!")
 
     return instrucciones
 
 
 def mostrar_camino_sobre_grafo(G, camino):
     """
-    Muestra el mapa del grafo con la ruta establecida en el camino de nodos.
+    Shows the graph map with the route given by the path of nodes.
 
     Args:
-        -G: Grafo donde se encuentran todos los nodos/aristas del mapa.
-        -camino: lista de nodos de la ruta establecida.
+        -G: graph holding all the nodes/edges of the map.
+        -camino: list of nodes of the chosen route.
     
     Returns: None
 
     Raises: None
     """
-    # Extraer coordenadas de la ruta
+    # Extract the route coordinates
     xs = [G.nodes[n]["x"] for n in camino]
     ys = [G.nodes[n]["y"] for n in camino]
  
-    # Crear figura
+    # Create the figure
     fig, ax = plt.subplots(figsize=(10, 10))
  
-    # Dibujar mapa base (OSM) usando contextily
+    # Draw the base map (OSM) using contextily
     ax.set_xlim(min(xs)-0.01, max(xs)+0.01)
     ax.set_ylim(min(ys)-0.01, max(ys)+0.01)
     ctx.add_basemap(ax, crs="EPSG:4326", source=ctx.providers.OpenStreetMap.Mapnik)
  
-    # Dibujar ruta encima
+    # Draw the route on top
     ax.plot(xs, ys, color="red", linewidth=3)
  
-    # Marcar inicio y final
+    # Mark start and end
     ax.scatter(xs[0], ys[0], c="green", s=50)
     ax.scatter(xs[-1], ys[-1], c="red", s=50)
  
@@ -295,9 +295,9 @@ def mostrar_camino_sobre_grafo(G, camino):
 
 def main():
     """
-    Función principal de ejecucion encargada de generar el DataFrame y el grafo de calles, preguntar al
-    usuario el origen y destino deseado, calcular el camino mínimo entre estas y mostrar por pantalla el 
-    mapa con la ruta.
+    Main entry point: builds the DataFrame and the street graph, asks the
+    user for the desired origin and destination, computes the shortest path between them and shows
+    the map with the route.
     """
     try:
         df = ca.carga_callejero()
@@ -311,14 +311,14 @@ def main():
 
     while True:
         try:
-            print("\n____NUEVA RUTA____\n")
-            inicio = usuario_nodo("origen")
+            print("\n____NEW ROUTE____\n")
+            inicio = usuario_nodo("origin")
 
             if inicio:
                 lat1, lon1 = ca.busca_direccion(inicio, df)
             else: return
 
-            final = usuario_nodo("destino")
+            final = usuario_nodo("destination")
             if final:
                 lat2, lon2 = ca.busca_direccion(final, df)
             else: return

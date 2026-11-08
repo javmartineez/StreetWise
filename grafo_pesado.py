@@ -1,34 +1,34 @@
 """
 grafo.py
 
-Matemática Discreta - IMAT
+Discrete Mathematics - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GP09B
-Integrantes:
+Group: GP09B
+Members:
     - Javier Martínez Berenguer
     - Javier Mochales López
 
-Descripción:
-Librería para el análisis de grafos pesados.
+Description:
+Library for the analysis of weighted graphs.
 """
 
 from typing import List,Tuple,Dict,Callable,Union
 import networkx as nx
 import sys
 
-import heapq #Librería para la creación de colas de prioridad
+import heapq #Library for creating priority queues
 
-INFTY=sys.float_info.max #Distincia "infinita" entre nodos de un grafo
+INFTY=sys.float_info.max #"Infinite" distance between nodes of a graph
 
 """
-En las siguientes funciones, las funciones de peso son funciones que reciben un grafo o digrafo y dos vértices y devuelven un real (su peso)
-Por ejemplo, si las aristas del grafo contienen en sus datos un campo llamado 'valor', una posible función de peso sería:
+In the following functions, weight functions are functions that receive a graph or digraph and two vertices and return a real number (their weight)
+For example, if the graph edges store a field called 'valor' in their data, a possible weight function would be:
 
 def mi_peso(G:nx.Graph,u:object, v:object):
     return G[u][v]['valor']
 
-y, en tal caso, para calcular Dijkstra con dicho parámetro haríamos
+and, in that case, to run Dijkstra with that parameter we would do
 
 camino=dijkstra(G,mi_peso,origen, destino)
 
@@ -36,31 +36,31 @@ camino=dijkstra(G,mi_peso,origen, destino)
 """
 
 def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object,object],float], Callable[[nx.DiGraph,object,object],float]], origen:object)-> Dict[object,object]:
-    """ Calcula un Árbol de Caminos Mínimos para el grafo pesado partiendo
-    del vértice "origen" usando el algoritmo de Dijkstra. Calcula únicamente
-    el árbol de la componente conexa que contiene a "origen".
-    
+    """ Computes a Shortest-Path Tree for the weighted graph starting
+    from the vertex "origen" using Dijkstra's algorithm. It only computes
+    the tree of the connected component containing "origen".
+
     Args:
-        origen (object): vértice del grafo de origen
+        origen (object): source vertex of the graph
     Returns:
-        Dict[object,object]: Devuelve un diccionario que indica, para cada vértice alcanzable
-            desde "origen", qué vértice es su padre en el árbol de caminos mínimos.
+        Dict[object,object]: dictionary that indicates, for each vertex reachable
+            from "origen", which vertex is its parent in the shortest-path tree.
     Raises:
-        TypeError: Si origen no es "hashable".
+        TypeError: If origen is not "hashable".
     Example:
-        Si G.dijksra(1)={2:1, 3:2, 4:1} entonces 1 es padre de 2 y de 4 y 2 es padre de 3.
-        En particular, un camino mínimo desde 1 hasta 3 sería 1->2->3.
+        If G.dijksra(1)={2:1, 3:2, 4:1} then 1 is the parent of 2 and 4, and 2 is the parent of 3.
+        In particular, a shortest path from 1 to 3 would be 1->2->3.
     """
-    # Verificar si el origen es hasheable
+    # Check that the source is hashable
     try:
         hash(origen)
     except TypeError:
-        raise TypeError(f"El origen no es hasheable: {type(origen).__name__}")
+        raise TypeError(f"The source is not hashable: {type(origen).__name__}")
     
     padres = {}
     d = {}
     visitados = set()
-    contador = 0 #para caso de empate a la hora de hacer heappop
+    contador = 0 #tie-breaker for heappop
     
 
     for v in G.nodes():
@@ -94,36 +94,36 @@ def dijkstra(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object
     return padres
 
 def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,object,object],float], Callable[[nx.DiGraph,object,object],float]] ,origen:object,destino:object)->List[object]:
-    """ Calcula el camino mínimo desde el vértice origen hasta el vértice
-    destino utilizando el algoritmo de Dijkstra.
-    
+    """ Computes the shortest path from the vertex origen to the vertex
+    destino using Dijkstra's algorithm.
+
     Args:
-        G (nx.Graph o nx.Digraph): grafo a grado dirigido
-        peso (función): función que recibe un grafo o grafo dirigido y dos vértices del mismo y devuelve el peso de la arista que los conecta
-        origen (object): vértice del grafo de origen
-        destino (object): vértice del grafo de destino
+        G (nx.Graph or nx.Digraph): graph or directed graph
+        peso (function): function that receives a graph or directed graph and two of its vertices and returns the weight of the edge connecting them
+        origen (object): source vertex of the graph
+        destino (object): destination vertex of the graph
     Returns:
-        List[object]: Devuelve una lista con los vértices del grafo por los que pasa
-            el camino más corto entre el origen y el destino. El primer elemento de
-            la lista es origen y el último destino.
+        List[object]: list with the graph vertices the shortest path between
+            the source and the destination goes through. The first element of
+            the list is origen and the last one is destino.
     Example:
-        Si dijksra(G,peso,1,4)=[1,5,2,4] entonces el camino más corto en G entre 1 y 4 es 1->5->2->4.
+        If dijksra(G,peso,1,4)=[1,5,2,4] then the shortest path in G between 1 and 4 is 1->5->2->4.
     Raises:
-        TypeError: Si origen o destino no son "hashable".
+        TypeError: If origen or destino are not "hashable".
     """
-    # Verificar si origen y destino son hasheables
+    # Check that source and destination are hashable
     try:
         hash(origen)
     except TypeError:
-        raise TypeError(f"El origen no es hasheable: {type(origen).__name__}")
-    
+        raise TypeError(f"The source is not hashable: {type(origen).__name__}")
+
     try:
         hash(destino)
     except TypeError:
-        raise TypeError(f"El destino no es hasheable: {type(destino).__name__}")
-    
+        raise TypeError(f"The destination is not hashable: {type(destino).__name__}")
 
-    # Calculamos el árbol de caminos mínimos
+
+    # Compute the shortest-path tree
     padres = dijkstra(G, peso, origen)
     
     camino = []
@@ -131,28 +131,28 @@ def camino_minimo(G:Union[nx.Graph, nx.DiGraph], peso:Union[Callable[[nx.Graph,o
     
     while actual is not None:
         camino.append(actual)
-        actual = padres[actual]         #recorremos el camino en orden inverso (del destino al orgien)
+        actual = padres[actual]         #walk the path backwards (from the destination to the source)
     
 
     camino.reverse()
     return camino
  
 def prim(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> Dict[object,object]:
-    """ Calcula un Árbol Abarcador Mínimo para el grafo pesado
-    usando el algoritmo de Prim.
-    
-    Args: None
+    """ Computes a Minimum Spanning Tree for the weighted graph
+    using Prim's algorithm.
+
+    Args:
+        G (nx.Graph): graph
+        peso (function): function that receives a graph and two of its vertices and returns the weight of the edge connecting them
     Returns:
-        G (nx.Graph): grafo
-        peso (función): función que recibe un grafo y dos vértices del grafo y devuelve el peso de la arista que los conecta
-        Dict[object,object]: Devuelve un diccionario que indica, para cada vértice del
-            grafo, qué vértice es su padre en el árbol abarcador mínimo.
+        Dict[object,object]: dictionary that indicates, for each vertex of the
+            graph, which vertex is its parent in the minimum spanning tree.
     Raises: None
     Example:
-        Si prim(G,peso)={1: None, 2:1, 3:2, 4:1} entonces en un árbol abarcador mínimo tenemos que:
-            1 es una raíz (no tiene padre)
-            1 es padre de 2 y de 4
-            2 es padre de 3
+        If prim(G,peso)={1: None, 2:1, 3:2, 4:1} then in a minimum spanning tree:
+            1 is a root (it has no parent)
+            1 is the parent of 2 and 4
+            2 is the parent of 3
 
     """
     padres = {}
@@ -195,19 +195,19 @@ def prim(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> Dict[objec
             
 
 def kruskal(G:nx.Graph, peso:Callable[[nx.Graph,object,object],float])-> List[Tuple[object,object]]:
-    """ Calcula un Árbol Abarcador Mínimo para el grafo
-    usando el algoritmo de Kruskal.
+    """ Computes a Minimum Spanning Tree for the graph
+    using Kruskal's algorithm.
 
     Args:
-        G (nx.Graph): grafo
-        peso (función): función que recibe un grafo y dos vértices del grafo y devuelve el peso de la arista que los conecta
+        G (nx.Graph): graph
+        peso (function): function that receives a graph and two of its vertices and returns the weight of the edge connecting them
     Returns:
-        List[Tuple[object,object]]: Devuelve una lista [(s1,t1),(s2,t2),...,(sn,tn)]
-            de los pares de vértices del grafo que forman las aristas
-            del arbol abarcador mínimo.
+        List[Tuple[object,object]]: list [(s1,t1),(s2,t2),...,(sn,tn)]
+            of the pairs of graph vertices forming the edges
+            of the minimum spanning tree.
     Raises: None
     Example:
-        En el ejemplo anterior en que prim(G,peso)={1:None, 2:1, 3:2, 4:1} podríamos tener, por ejemplo,
+        In the previous example where prim(G,peso)={1:None, 2:1, 3:2, 4:1} we could have, for instance,
         kruskal(G,peso)=[(1,2),(1,4),(3,2)]
     """
     
