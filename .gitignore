@@ -1,25 +1,28 @@
-# Ignorar el entorno virtual
+# Virtual environment
 venv/
+.venv/
 
-# Ignorar archivos temporales de Python
+# Python temporary files
 __pycache__/
-*.pyc
+*.py[cod]
 
-# Ignorar archivos de configuración o cache de editores
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor caches / settings
 .vscode/
 .idea/
 
-# Ignorar archivos del sistema
+# OS files
 .DS_Store
 
-# Ignorar dataset 
+# Dataset (downloaded separately)
 direcciones.csv
 
-# Ignorar notebook pruebas
+# Scratch notebooks and notes
 prueba.ipynb
+apuntes_practica_presencial.ipynb
 
-# Ignorar grafo de madrid
+# Madrid street graph and OSMnx cache
 madrid.graphml
-
-#ignorar la cache del hml
 cache/
